@@ -1,0 +1,38 @@
+{
+  "name": "tymfrontiers-cdn/php-sos-admin",
+  "description": "PHP: SOS Admin object",
+  "keywords": ["php","frontiers", "soswapp", "sos", "admin"],
+  "homepage": "https://github.com/tymfrontiers-cdn/php-sos-admin",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+      {
+          "name": "Sir Louis",
+          "email": "me@sirlouis.io",
+          "homepage": "https://sirlouis.io",
+          "role": "developer"
+      },
+      {
+          "name": "Tym Frontiers Ltd",
+          "email": "git@tymfrontiers.com",
+          "homepage": "https://tymfrontiers.com",
+          "role": "developer"
+      }
+  ],
+  "require": {
+    "php" : ">=7.0",
+    "tymfrontiers-cdn/php-data" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-mysql-database" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-mysql-database-object" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-pagination" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-instance-error" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-validator" : ">=0.1@stable",
+    "tymfrontiers-cdn/php-sos-user" : ">=0.1@stable"
+  },
+  "require-dev": {},
+  "autoload": {
+      "psr-4": {
+          "SOS\\": "src/"
+      }
+  }
+}
