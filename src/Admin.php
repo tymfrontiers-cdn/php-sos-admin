@@ -98,7 +98,7 @@ class Admin{
     $file_tbl = MYSQL_FILE_TBL;
     $phone = false;
     $email = $database->escapeValue($email);
-    if (@ $phone = Data::phoneToIntl($email, $country_code)) {
+    if (@ $phone = $data->phoneToIntl($email, $country_code)) {
       $phone = $database->escapeValue($phone);
     }
     $password = $database->escapeValue($password);
