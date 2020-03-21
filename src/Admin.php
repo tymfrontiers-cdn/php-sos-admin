@@ -66,6 +66,7 @@ class Admin{
     @ $file_tbl = MYSQL_FILE_TBL;
     $query = "SELECT usr._id, usr.status, usr.work_group, usr.email,
                      usr.phone, usr.name, usr.surname, usr.country_code, usr.state_code, usr._author, usr._created,
+                     CONCAT(ausr.name, ' ', ausr.surname) AS author_name,
                      wg.rank AS access_rank,
                      c.name AS country,
                      st.name AS 'state',
@@ -73,6 +74,7 @@ class Admin{
                         SELECT CONCAT('{$whost}','/file/',f._name)
                       ) AS avatar
               FROM :db:.:tbl: AS usr
+              LEFT JOIN :db:.:tbl: AS ausr ON ausr._id = usr._author
               LEFT JOIN :db:.work_group AS wg ON wg.name=usr.work_group
               LEFT JOIN `{$data_db}`.`country` AS c ON c.code = usr.country_code
               LEFT JOIN `{$data_db}`.`state` AS st ON st.code = usr.state_code
@@ -82,9 +84,17 @@ class Admin{
               OR usr.email = '{$id}'
               LIMIT 1";
     if ($found = self::findBySql($query)) {
-      foreach ($found[0] as $prop => $val) {
+      $found = $found[0];
+      foreach ($found as $prop => $val) {
         if (\property_exists($this, $prop) && !\in_array($prop, ["password"])) $this->$prop = $val;
       }
+      $this->country = $found->country;
+      $this->state = $found->state;
+      $this->access_rank = $found->access_rank;
+      $this->author_name = $found->author_name;
+      $this->avatar = (!empty($found->avatar) && Generic::urlExist($found->avatar))
+        ? $found->avatar
+        : $whost . "/admin/assets/img/default-avatar.png";
     }
   }
   public static function authenticate (string $email, string $password, string $country_code = 'NG') {
@@ -145,37 +155,26 @@ class Admin{
   // public function _create() { return false; }
   public function id () { return $this->_id; }
   public function author () { return $this->_author; }
-  final static function invite (array $props, string $author, string $work_group = "USER") {
-    self::_checkEnv();
-    $valid = new Validator;
-    $req = [
-      "name" => "name",
-      "surname" => "name",
-      "email" => "email",
-      "phone" => "tel"
-    ];
-    $valid_props = [];
-    $val_errors = [];
-    $err_index = 0;
-    foreach ($req as $prop => $type) {
-      if (\array_key_exists($prop, $props)) :
-        $meth = $type;
-        if (empty($props[$prop]) || !$valid->$meth($props[$prop], [$prop, $meth]) ) {
-          ++ $err_index;
-          $val_errors[] = "({$err_index}). Empty/invalid value given for [{$prop}]. \r\n";
-        } else {
-          $valid_props[$prop] = $props[$prop];
-        }
-      else :
-        ++ $err_index;
-        $val_errors[] = "({$err_index}). [{$prop}] is required but not given. \r\n";
-      endif;
-    }
-    if (!empty($val_errors)) {
-      throw new \Exception("Error(s) found in parameter(s) given: \r\n" . \implode("", $val_errors), 1);
-    }
-
-    return false;
+  public function hasAccess (string $path, string $domain) {
+    global $database;
+    $path_name = $database->escapeValue($domain . $path);
+    $domain = $database->escapeValue($domain);
+    $user = $database->escapeValue($this->_id);
+    $query = "SELECT * FROM :db:.path_access
+              WHERE (
+                path_name = '{$path_name}'
+                AND user = '{$user}'
+              )
+              OR (
+                (
+                  SELECT COUNT(*)
+                  FROM :db:.path_access
+                  WHERE user='{$user}'
+                  AND path_name = CONCAT('{$domain}','/')
+                ) > 0
+              )
+            LIMIT 1";
+    return (bool) self::findBySql($query);
   }
   // check environment
   private static function _checkEnv(){
@@ -193,4 +192,4 @@ class Admin{
       $GLOBALS['database'] = new \TymFrontiers\MySQLDatabase(MYSQL_SERVER, MYSQL_GUEST_USERNAME, MYSQL_GUEST_PASS, self::$_db_name);
     }
   }
-}
+} 
