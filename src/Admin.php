@@ -49,7 +49,7 @@ class Admin{
 
   function __construct (string $id = "") {
     if (
-        (new \TymFrontiers\Validator() )->username($id,["id","username",3,12])
+        (new \TymFrontiers\Validator() )->username($id,["id","username",3,12, [], "MIXED"])
         || (new \TymFrontiers\Validator() )->email($id,["email","email"])
       ) {
       $this->_objtize($id);
@@ -192,4 +192,4 @@ class Admin{
       $GLOBALS['database'] = new \TymFrontiers\MySQLDatabase(MYSQL_SERVER, MYSQL_GUEST_USERNAME, MYSQL_GUEST_PASS, self::$_db_name);
     }
   }
-} 
+}
