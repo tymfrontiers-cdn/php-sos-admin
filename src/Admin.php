@@ -165,13 +165,12 @@ class Admin{
                 path_name = '{$path_name}'
                 AND user = '{$user}'
               )
-              OR (
-                (
-                  SELECT COUNT(*)
-                  FROM :db:.path_access
-                  WHERE user='{$user}'
-                  AND path_name = CONCAT('{$domain}','/')
-                ) > 0
+              OR user = (
+                SELECT user
+                FROM :db:.path_access
+                WHERE user='{$user}'
+                AND path_name = CONCAT('{$domain}','/')
+                LIMIT 1
               )
             LIMIT 1";
     return (bool) self::findBySql($query);
