@@ -157,7 +157,7 @@ class Admin{
   public function author () { return $this->_author; }
   public function hasAccess (string $path, string $domain) {
     global $database;
-    $path_name = $database->escapeValue($domain . $path);
+    $path_name = $database->escapeValue($path);
     $domain = $database->escapeValue($domain);
     $user = $database->escapeValue($this->_id);
     $query = "SELECT * FROM :db:.path_access
@@ -165,12 +165,15 @@ class Admin{
                 path_name = '{$path_name}'
                 AND user = '{$user}'
               )
-              OR user = (
-                SELECT user
-                FROM :db:.path_access
-                WHERE user='{$user}'
-                AND path_name = CONCAT('{$domain}','/')
-                LIMIT 1
+              OR (
+                user = '{$user}'
+                AND path_name = (
+                    SELECT `name`
+                    FROM :db:.`work_path`
+                    WHERE `domain` = '{$domain}'
+                    AND `path` = '/'
+                    LIMIT 1
+                )
               )
             LIMIT 1";
     return (bool) self::findBySql($query);
