@@ -94,7 +94,7 @@ class Admin{
       $this->author_name = $found->author_name;
       $this->avatar = (!empty($found->avatar) && Generic::urlExist($found->avatar))
         ? $found->avatar
-        : $whost . "/admin/assets/img/default-avatar.png";
+        : "/app/tymfrontiers-cdn/admin.soswapp/img/default-avatar.png";
     }
   }
   public static function authenticate (string $email, string $password, string $country_code = 'NG') {
@@ -147,7 +147,7 @@ class Admin{
       $usr->country_code = $user->country_code;
       $usr->avatar = (!empty($user->avatar) && Generic::urlExist($user->avatar))
         ? $user->avatar
-        : $whost . "/admin/assets/img/default-avatar.png";
+        : "/app/tymfrontiers-cdn/admin.soswapp/img/default-avatar.png";
       return $usr;
     }
     return false;
@@ -160,9 +160,16 @@ class Admin{
     $path_name = $database->escapeValue($path);
     $domain = $database->escapeValue($domain);
     $user = $database->escapeValue($this->_id);
+    if (!\in_array($this->status, ["ACTIVE"]) ) return false;
     $query = "SELECT * FROM :db:.path_access
               WHERE (
-                path_name = '{$path_name}'
+                path_name = (
+                  SELECT name
+                  FROM :db:.work_path
+                  WHERE domain = '{$domain}'
+                  AND `path` = '{$path_name}'
+                  LIMIT 1
+                )
                 AND user = '{$user}'
               )
               OR (
