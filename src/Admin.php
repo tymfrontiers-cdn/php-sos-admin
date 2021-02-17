@@ -179,6 +179,7 @@ class Admin{
                     FROM :db:.`work_path`
                     WHERE `domain` = '{$domain}'
                     AND `path` = '/'
+                    AND `type` = 'ALTER'
                     LIMIT 1
                 )
               )
