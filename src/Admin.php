@@ -49,7 +49,7 @@ class Admin{
 
   function __construct (string $id = "") {
     if (
-        (new \TymFrontiers\Validator() )->username($id,["id","username",3,12, [], "MIXED"])
+        (new \TymFrontiers\Validator() )->username($id,["id","username",3,16, [], "MIXED"])
         || (new \TymFrontiers\Validator() )->email($id,["email","email"])
       ) {
       $this->_objtize($id);
@@ -170,10 +170,10 @@ class Admin{
                   AND `path` = '{$path_name}'
                   LIMIT 1
                 )
-                AND user = '{$user}'
+                AND `user` = '{$user}'
               )
               OR (
-                user = '{$user}'
+                `user` = '{$user}'
                 AND path_name = (
                     SELECT `name`
                     FROM :db:.`work_path`
@@ -184,7 +184,8 @@ class Admin{
                 )
               )
             LIMIT 1";
-    return (bool) self::findBySql($query);
+    $retn = self::findBySql($query);
+    return (bool) $retn;
   }
   // check environment
   private static function _checkEnv(){
